@@ -1,19 +1,19 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "RentX documentation",
-    "description": "This is an API Rent",
+    "title": "SOLID Introduction",
+    "description": "This is api to learn SOLID and clean architectures",
     "version": "1.0.0",
     "contact": {
-      "email": "diegopgc@gmail.com"
+      "email": "brunohenriquesantos272@gmail.com"
     }
   },
   "paths": {
-    "/categories": {
+    "/users": {
       "post": {
-        "tags": ["Category"],
-        "summary": "Create a category",
-        "description": "Create a new category",
+        "tags": ["User"],
+        "summary": "Create new user",
+        "description": "Create a new user",
         "requestBody": {
           "content": {
             "application/json": {
@@ -23,13 +23,13 @@
                   "name": {
                     "type": "string"
                   },
-                  "description": {
+                  "email": {
                     "type": "string"
                   }
                 },
                 "example": {
-                  "name": "category name sample",
-                  "description": "Category description sample"
+                  "name": "Jane Doe",
+                  "email": "janedoe@gmail.com"
                 }
               }
             }
@@ -37,34 +37,82 @@
         },
         "responses": {
           "201": {
-            "description": "Created"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "name": { "type": "string" },
+                    "email": { "type": "string" },
+                    "admin": { "type": "boolean" },
+                    "created_at": { "type": "string", "format": "date" },
+                    "updated_at": { "type": "string", "format": "date" }
+                  }
+                }
+              }
+            }
           },
-          "500": {
-            "description": "Category already exists"
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": "User already exists"
+                  }
+                }
+              }
+            }
           }
         }
       },
+
       "get": {
-        "tags": ["Category"],
-        "summary": "List all categories",
-        "description": "List all categories",
+        "tags": ["User"],
+        "summary": "List All Users",
+        "description": "List all users if user have previleges",
+
+        "parameters": [
+          {
+            "in": "header",
+            "name": "user_id",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          }
+        ],
+
         "responses": {
           "200": {
-            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      }
+                  "properties": [
+                    {
+                      "id": { "type": "string", "format": "uuid" },
+                      "name": { "type": "string" },
+                      "email": { "type": "string" },
+                      "admin": { "type": "boolean" },
+                      "created_at": { "type": "string", "format": "date" },
+                      "updated_at": { "type": "string", "format": "date" }
                     }
+                  ]
+                }
+              }
+            }
+          },
+          
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": "User does not have privileges or not exists"
                   }
                 }
               }
@@ -73,95 +121,106 @@
         }
       }
     },
-    "/categories/import": {
-      "post": {
-        "tags": ["Category"],
-        "summary": "Upload a new category",
-        "description": "Upload a new category",
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
+
+    "/users/{user_id}/admin": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Turn user to admin",
+        "description": "Make a created user admin",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "Admin ID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "email": { "type": "string" },
+                    "admin": { "type": "boolean" },
+                    "created_at": { "type": "string", "format": "date" },
+                    "updated_at": { "type": "string", "format": "date" }
                   }
                 }
               }
             }
-          }
-        },
-        "responses":{
-          "201": {
-            "description": "Created"
+          },
+
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": "User does not exists !"
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/specifications": {
-      "post": {
-        "tags": ["Specifications"],
-        "summary": "Create a specification",
-        "description":"Create a new specification",
-        "requestBody":{
-          "content":{
-            "application/json": {
-              "schema": {
-                "$ref": "#/definitions/Specification"
-              }
+
+    "/users/{user_id}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "List one user",
+        "description": "List one user using the user_id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "description": "ID of user will be apresented",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
-        },
-        "responses":{
-          "201": {
-            "description": "Created"
-          },
-          "500": {
-            "description": "Specification already exists"
-          }
-        }
-      },
-      "get": {
-        "tags": ["Specifications"],
-        "summary": "List all specifications",
-        "description": "List all specifications",
+        ],
         "responses": {
           "200": {
-            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "type": "string"
-                      }
-                    }
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "name": { "type": "string" },
+                    "email": { "type": "string" },
+                    "admin": { "type": "boolean" },
+                    "created_at": { "type": "string", "format": "date" },
+                    "updated_at": { "type": "string", "format": "date" }
+                  }
+                }
+              }
+            }
+          },
+
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": "User does not exists"
                   }
                 }
               }
             }
           }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "Specification": {
-      "type": "object",
-      "properties":{
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
         }
       }
     }
